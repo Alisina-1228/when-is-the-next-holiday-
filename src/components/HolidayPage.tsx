@@ -79,7 +79,7 @@ export default function HolidayPage() {
 
       {/* ── Top bar ── */}
       <header className="border-b border-neutral-100 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-sm font-bold text-black">تعطیلی بعدی کی هست؟</h1>
+        <h1 className="text-sm font-bold text-black">تعطیلی بعدی چه روزیه؟ 👀</h1>
         <p className="text-xs text-neutral-400">
           {pd ? `${toFarsi(pd.day)} ${MONTH_NAMES[pd.month]} ${toFarsi(pd.year)}` : ""}
         </p>
@@ -87,19 +87,19 @@ export default function HolidayPage() {
 
       {/* ── Body: single col mobile, two col desktop ── */}
       <main className="max-w-5xl mx-auto px-5 py-10 sm:py-16
-                       grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
+                       grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-stretch">
 
         {/* ── LEFT: hero ── */}
-        <div>
+        <div className="flex flex-col">
           {loading ? (
-            <div className={`rounded-3xl bg-neutral-50 px-8 py-12 text-center space-y-4`}>
+            <div className="rounded-3xl bg-neutral-50 px-8 py-12 text-center flex flex-col justify-center flex-1 space-y-4">
               <Skeleton className="h-28 w-28 mx-auto rounded-2xl" />
               <Skeleton className="h-5 w-48 mx-auto" />
               <Skeleton className="h-7 w-40 mx-auto" />
               <Skeleton className="h-6 w-24 mx-auto rounded-full" />
             </div>
           ) : next ? (
-            <div className={`rounded-3xl px-8 py-12 text-center ${heroBg}`}>
+            <div className={`rounded-3xl px-8 py-12 text-center flex flex-col justify-center flex-1 ${heroBg}`}>
               {/* big number */}
               <div className={`text-[100px] md:text-[140px] font-black leading-none tabular-nums ${heroNum}`}>
                 {toFarsi(next.daysUntil)}
@@ -147,9 +147,6 @@ export default function HolidayPage() {
 
         {/* ── RIGHT: upcoming list ── */}
         <div className="space-y-5">
-
-          {/* section label */}
-          <p className="text-xs text-neutral-400 tracking-widest uppercase">تعطیلات بعدی</p>
 
           {/* filter tabs */}
           <div className="flex gap-1 bg-neutral-100 rounded-2xl p-1">
