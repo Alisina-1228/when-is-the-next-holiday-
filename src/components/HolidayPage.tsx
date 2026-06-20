@@ -68,7 +68,8 @@ export default function HolidayPage() {
       if (filter === "public") return !h.isPureWeekend;
       if (filter === "weekend") return h.solar.dayWeek === "ج";
       return true;
-    });
+    })
+    .slice(0, 8);
 
   const heroBg     = accent === "blue" ? "bg-blue-50"   : "bg-rose-50";
   const heroNum    = accent === "blue" ? "text-blue-500" : "text-rose-500";
@@ -87,7 +88,7 @@ export default function HolidayPage() {
 
       {/* ── Body: single col mobile, two col desktop ── */}
       <main className="max-w-5xl mx-auto px-5 py-10 sm:py-16
-                       grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
+                       grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-stretch">
 
         {/* ── LEFT: hero ── */}
         <div className="flex flex-col">
@@ -99,7 +100,7 @@ export default function HolidayPage() {
               <Skeleton className="h-6 w-24 mx-auto rounded-full" />
             </div>
           ) : next ? (
-            <div className={`rounded-3xl px-8 py-12 text-center flex flex-col justify-center min-h-[520px] ${heroBg}`}>
+            <div className={`rounded-3xl px-8 py-12 text-center flex flex-col justify-center h-full ${heroBg}`}>
               {/* big number */}
               <div className={`text-[100px] md:text-[140px] font-black leading-none tabular-nums ${heroNum}`}>
                 {toFarsi(next.daysUntil)}
