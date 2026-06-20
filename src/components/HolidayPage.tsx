@@ -37,13 +37,11 @@ function getDayName(dw: string): string {
 }
 
 function getDaysUntilLabel(days: number, isWeekend: boolean): string {
-  if (days === 1 && !isWeekend) return "وای! فردا تعطیله! کرکره‌ها رو بکش پایین که رفتیم تو فاز استراحت 😎🎉";
-  if (days === 1 && isWeekend)  return "پاشو که فردا جمعه‌ست! اصلاً بوی کباب و خواب تا لنگ ظهر میاد 🤤🛌";
-  if (days === 2)               return "فقط یه فردا رو دندون رو جیگر بذار... پس‌فردا تعطیله! 😍✌️";
-  if (days <= 7)                return `داریم می‌رسیم! فقط ${toFarsi(days)} روز دیگه مونده تا یه نفس راحت بکشیم 🏃‍♂️💨`;
-  if (days <= 14)               return `طاقت بیار رفیق! ${toFarsi(days)} روز دیگه یه تعطیلی مشتی تو راهه 💪🔥`;
-  if (days <= 30)               return `هعی... ${toFarsi(days)} روز مونده. یه کم دوره، ولی خب به امید همون زنده‌ایم! 🥲🚶‍♂️`;
-  return                               `ای بابا... ${toFarsi(days)} روز دیگه تا تعطیلی مونده! تقویمم که انگار باهامون لجه 😩📅`;
+  if (days === 1) return isWeekend ? "فردا جمعه‌ست! 🛌" : "فردا تعطیله! 🎉";
+  if (days === 2) return "پس‌فردا تعطیله ✌️";
+  if (days <= 7)  return `فقط ${toFarsi(days)} روز دیگه! 💪`;
+  if (days <= 14) return `${toFarsi(days)} روز دیگه طاقت بیار`;
+  return `${toFarsi(days)} روز تا تعطیلی`;
 }
 
 type Filter = "all" | "public" | "weekend";
@@ -62,6 +60,7 @@ export default function HolidayPage() {
 
   const pd = data?.currentPersianDate;
   const next = data?.nextHoliday;
+  const accent = next?.isPureWeekend ? "blue" : "rose";
 
   const filteredUpcoming = (data?.upcomingHolidays ?? [])
     .slice(1)
@@ -71,84 +70,88 @@ export default function HolidayPage() {
       return true;
     });
 
-  return (
-    <div className="min-h-screen bg-white flex flex-col items-center px-5 py-12 sm:py-20">
-      <div className="w-full max-w-sm">
+  const heroBg     = accent === "blue" ? "bg-blue-50"   : "bg-rose-50";
+  const heroNum    = accent === "blue" ? "text-blue-500" : "text-rose-500";
+  const badgeBg    = accent === "blue" ? "bg-blue-100 text-blue-600" : "bg-rose-100 text-rose-600";
 
-        {/* Date header */}
-        <div className="text-center mb-10">
-          <p className="text-[10px] tracking-widest text-neutral-300 mb-1 uppercase">امروز</p>
-          <p className="text-sm font-bold text-neutral-600">
-            {pd ? `${toFarsi(pd.day)} ${MONTH_NAMES[pd.month]} ${toFarsi(pd.year)}` : ""}
-          </p>
+  return (
+    <div className="min-h-screen bg-white">
+
+      {/* ── Top bar ── */}
+      <header className="border-b border-neutral-100 px-6 py-4 flex items-center justify-between">
+        <h1 className="text-sm font-bold text-black">تعطیلی بعدی کی هست؟</h1>
+        <p className="text-xs text-neutral-400">
+          {pd ? `${toFarsi(pd.day)} ${MONTH_NAMES[pd.month]} ${toFarsi(pd.year)}` : ""}
+        </p>
+      </header>
+
+      {/* ── Body: single col mobile, two col desktop ── */}
+      <main className="max-w-5xl mx-auto px-5 py-10 sm:py-16
+                       grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
+
+        {/* ── LEFT: hero ── */}
+        <div>
+          {loading ? (
+            <div className={`rounded-3xl bg-neutral-50 px-8 py-12 text-center space-y-4`}>
+              <Skeleton className="h-28 w-28 mx-auto rounded-2xl" />
+              <Skeleton className="h-5 w-48 mx-auto" />
+              <Skeleton className="h-7 w-40 mx-auto" />
+              <Skeleton className="h-6 w-24 mx-auto rounded-full" />
+            </div>
+          ) : next ? (
+            <div className={`rounded-3xl px-8 py-12 text-center ${heroBg}`}>
+              {/* big number */}
+              <div className={`text-[100px] md:text-[140px] font-black leading-none tabular-nums ${heroNum}`}>
+                {toFarsi(next.daysUntil)}
+              </div>
+
+              {/* label */}
+              <p className="text-sm font-medium text-neutral-500 mt-3 mb-6">
+                {getDaysUntilLabel(next.daysUntil, next.isPureWeekend)}
+              </p>
+
+              {/* date */}
+              <p className="text-2xl font-bold text-black">
+                {getDayName(next.solar.dayWeek)}&nbsp;
+                {toFarsi(next.solar.day)}&nbsp;
+                {MONTH_NAMES[next.solar.month]}
+              </p>
+
+              {/* badge */}
+              <span className={`inline-block mt-4 text-xs px-3 py-1.5 rounded-full font-semibold ${badgeBg}`}>
+                {next.isPureWeekend ? "آخر هفته" : "تعطیل رسمی"}
+              </span>
+
+              {/* event */}
+              {next.event.length > 0 && (
+                <p className="text-xs text-neutral-400 mt-3">{next.event[0]}</p>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-3xl bg-neutral-50 px-8 py-12 text-center space-y-2">
+              <p className="text-lg font-bold text-black">تعطیلی نزدیک نیست!</p>
+              <p className="text-sm text-neutral-400">در ۹۰ روز آینده خبری نیست.</p>
+            </div>
+          )}
+
+          {/* Today banner — shown below hero */}
+          {data?.todayInfo && (
+            <div className="mt-4 bg-emerald-50 rounded-2xl px-5 py-4 text-center">
+              <p className="text-sm text-emerald-600 font-semibold">امروز تعطیله! 🥳</p>
+              {data.todayInfo.event[0] && (
+                <p className="text-xs text-emerald-400 mt-1">{data.todayInfo.event[0]}</p>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Hero */}
-        {loading ? (
-          <div className="rounded-3xl bg-rose-50 px-6 py-10 space-y-4 text-center mb-6">
-            <Skeleton className="h-20 w-20 mx-auto rounded-2xl" />
-            <Skeleton className="h-4 w-48 mx-auto" />
-            <Skeleton className="h-6 w-40 mx-auto" />
-            <Skeleton className="h-6 w-24 mx-auto rounded-full" />
-          </div>
-        ) : next ? (
-          <div className={`rounded-3xl px-6 py-10 text-center mb-6 ${
-            next.isPureWeekend ? "bg-blue-50" : "bg-rose-50"
-          }`}>
-            <div className={`text-[80px] sm:text-[96px] font-black leading-none tabular-nums mb-3 ${
-              next.isPureWeekend ? "text-blue-500" : "text-rose-500"
-            }`}>
-              {toFarsi(next.daysUntil)}
-            </div>
-
-            <p className="text-sm font-medium text-neutral-500 leading-relaxed px-2 mb-5">
-              {getDaysUntilLabel(next.daysUntil, next.isPureWeekend)}
-            </p>
-
-            <p className="text-xl font-bold text-black mb-3">
-              {getDayName(next.solar.dayWeek)} {toFarsi(next.solar.day)} {MONTH_NAMES[next.solar.month]}
-            </p>
-
-            <span className={`text-xs px-3 py-1.5 rounded-full font-semibold inline-block mb-2 ${
-              next.isPureWeekend
-                ? "bg-blue-100 text-blue-600"
-                : "bg-rose-100 text-rose-600"
-            }`}>
-              {next.isPureWeekend ? "آخر هفته" : "تعطیل رسمی"}
-            </span>
-
-            {next.event.length > 0 && (
-              <p className="text-xs text-neutral-400 mt-1">{next.event[0]}</p>
-            )}
-          </div>
-        ) : (
-          <div className="rounded-3xl bg-neutral-50 px-6 py-10 text-center mb-6 space-y-2">
-            <p className="text-lg font-bold text-black">فاجعه‌ست!</p>
-            <p className="text-sm text-neutral-400 leading-relaxed">
-              هیچ تعطیلی‌ای نزدیک نیست... رسماً باید بریم تو افق محو شیم 💀🥀
-            </p>
-          </div>
-        )}
-
-        {/* Today banner */}
-        {data?.todayInfo && (
-          <div className="bg-emerald-50 rounded-2xl px-4 py-3 text-center mb-8">
-            <p className="text-sm text-emerald-600 font-semibold">
-              امروز تعطیله! گوشیو بنداز کنار، فقط بخواب و عشق کن 🥳🛋️
-            </p>
-            {data.todayInfo.event[0] && (
-              <p className="text-xs text-emerald-400 mt-0.5">{data.todayInfo.event[0]}</p>
-            )}
-          </div>
-        )}
-
-        {/* Divider */}
-        <div className="border-t border-neutral-100 mb-8" />
-
-        {/* Upcoming section */}
+        {/* ── RIGHT: upcoming list ── */}
         <div className="space-y-5">
 
-          {/* Filter tabs */}
+          {/* section label */}
+          <p className="text-xs text-neutral-400 tracking-widest uppercase">تعطیلات بعدی</p>
+
+          {/* filter tabs */}
           <div className="flex gap-1 bg-neutral-100 rounded-2xl p-1">
             {([["all", "همه"], ["public", "رسمی"], ["weekend", "آخر هفته"]] as [Filter, string][]).map(([val, label]) => (
               <button
@@ -165,31 +168,34 @@ export default function HolidayPage() {
             ))}
           </div>
 
-          {/* List */}
+          {/* list */}
           {loading ? (
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+              {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-12 w-full" />)}
             </div>
           ) : filteredUpcoming.length === 0 ? (
-            <div className="text-center py-8 space-y-1">
-              <p className="text-2xl">🔍</p>
-              <p className="text-sm text-neutral-300 font-medium">
-                با این فیلترایی که زدی هیچ تعطیلی‌ای پیدا نکردم. مطمئنی درست گشتی؟
-              </p>
+            <div className="text-center py-10 space-y-1">
+              <p className="text-2xl">🫙</p>
+              <p className="text-sm text-neutral-300 font-medium">موردی پیدا نشد</p>
             </div>
           ) : (
-            <div className="space-y-1">
+            <div>
               {filteredUpcoming.map((h, i) => (
-                <div key={i} className="flex items-center gap-3 py-3 border-b border-neutral-50 last:border-0">
-                  <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                <div
+                  key={i}
+                  className="flex items-center gap-4 py-3.5 border-b border-neutral-50 last:border-0"
+                >
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${
                     h.isPureWeekend ? "bg-blue-300" : "bg-rose-400"
                   }`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-black">
-                      {getDayName(h.solar.dayWeek)} {toFarsi(h.solar.day)} {MONTH_NAMES[h.solar.month]}
+                      {getDayName(h.solar.dayWeek)}&nbsp;
+                      {toFarsi(h.solar.day)}&nbsp;
+                      {MONTH_NAMES[h.solar.month]}
                     </p>
                     {h.event.length > 0 && (
-                      <p className="text-xs text-neutral-400 truncate">{h.event[0]}</p>
+                      <p className="text-xs text-neutral-400 truncate mt-0.5">{h.event[0]}</p>
                     )}
                   </div>
                   <span className={`text-xs font-semibold tabular-nums shrink-0 ${
@@ -203,7 +209,7 @@ export default function HolidayPage() {
           )}
         </div>
 
-      </div>
+      </main>
     </div>
   );
 }
